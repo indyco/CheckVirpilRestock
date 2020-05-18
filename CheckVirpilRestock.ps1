@@ -23,7 +23,7 @@ if (($restockDate.AddHours(-7)) -gt (Get-Date)) { # if $restockDate is in the fu
 
 Write-Host $restockInfo[1]
 Write-Host "Local datetime: "$restockDate.AddHours(-7) -ForegroundColor $color
-Write-Host "Website info: "$restockInfo[2], $restockInfo[3], $restockInfo[4]`n
+Write-Host "Website info: "$restockInfo[2], $restockInfo[3], ($restockInfo[4]).Split("?",2)[0]`n
 
 $equipment | ForEach-Object { 
     if ($_ -like '*VPC*' ) {
