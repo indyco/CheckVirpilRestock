@@ -2,10 +2,10 @@ $getUrl = Invoke-WebRequest 'https://forum.virpil.com/index.php?/topic/142-world
 $restockInfo = $getUrl | ForEach-Object { [regex]::matches( $_, '(?<=<strong>)(.*?)(?=</strong>)' ) } | Select-Object -ExpandProperty value
 $equipment = $getUrl | ForEach-Object { [regex]::matches( $_, '(?<=<li>\s+)(.*?)(?=\s+</li>)' ) } | Select-Object -ExpandProperty value
 
-# get rid of "Time: and GMT"
-$websiteTime = (($restockInfo[4].Substring(($restockInfo[4].IndexOf(":"))+1)).Trim()) -replace ".{4}$"
-# split by space (\s), return only two strings (,2)
-$timeWithAMPM = (([DateTime]$websiteTime).ToString() -split '\s',2)
+# get rid of beginning of element
+$websiteTime = (($restockInfo[4].Substring(($restockInfo[4].IndexOf("~"))+1)).Trim())
+# get AM or PM out of element, join with time (begginning of $websiteTime string), convert to datetime, split into two strings
+$timeWithAMPM = (([DateTime]((($websiteTime.Split("?",2))[0]) + (($websiteTime.Split(">",2))[1]).SubString(0,2)))).ToString() -split '\s',2
 # join date with time (second element in $timeWithAMPM array because of -split)
 $combinedDateTime = $restockInfo[3],$timeWithAMPM[1]
 
