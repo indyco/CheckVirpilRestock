@@ -20,13 +20,6 @@ while ($timesToRun -eq 0) {
         
         $restockDate = [DateTime]$combinedDateTime
 
-        # if ($timeWithAMPM[1].length -eq 10) {
-        #     $restockDate = [DateTime]::ParseExact($combinedDateTime, 'dd.MM.yyyy h:mm:ss tt', $null)
-        # }
-        # elseif ($timeWithAMPM[1].length -eq 11) {
-        #     $restockDate = [DateTime]::ParseExact($combinedDateTime, 'dd.MM.yyyy hh:mm:ss tt', $null)
-        # }
-
         $color = "Red"
         if (($restockDate.AddHours(-7)) -gt (Get-Date)) { # if $restockDate is in the future, write in green
             $color = "Green"
