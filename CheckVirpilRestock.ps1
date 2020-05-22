@@ -1,11 +1,11 @@
 $timesToRun = 0
 while ($timesToRun -eq 0) {
-    Clear-Host
-
     $getUrl = Invoke-WebRequest 'https://forum.virpil.com/index.php?/topic/142-worldwide-webstore-restock-date/'
     $restockInfo = $getUrl | ForEach-Object { [regex]::matches( $_, '(?<=<strong>)(.*?)(?=</strong>)' ) } | Select-Object -ExpandProperty value
     $equipment = $getUrl | ForEach-Object { [regex]::matches( $_, '(?<=<li>\s+)(.*?)(?=\s+</li>)' ) } | Select-Object -ExpandProperty value
 
+    Clear-Host
+    ((Get-Date).ToString() -split '\s',2)[1]
     Write-Host $restockInfo[1]
 
     try {
