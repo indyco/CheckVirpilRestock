@@ -2,6 +2,7 @@ $timesToRun = 0
 while ($timesToRun -eq 0) {
     $getUrl = Invoke-WebRequest 'https://forum.virpil.com/index.php?/topic/142-worldwide-webstore-restock-date/'
     $restockInfo = $getUrl | ForEach-Object { [regex]::matches( $_, '(?<=<strong>)(.*?)(?=</strong>)' ) } | Select-Object -ExpandProperty value
+    $date = $getUrl | ForEach-Object { [regex]::matches( $_, '(?<=<b>)(.*?)(?=</b>)' ) } | Select-Object -ExpandProperty value
     $equipment = $getUrl | ForEach-Object { [regex]::matches( $_, '(?<=<li>\s+)(.*?)(?=\s+</li>)' ) } | Select-Object -ExpandProperty value
 
     Clear-Host
@@ -10,18 +11,21 @@ while ($timesToRun -eq 0) {
 
     try {
         # get rid of beginning of element
-        $websiteTime = (($restockInfo[4].Substring(($restockInfo[4].IndexOf("~"))+1)).Trim())
+        $websiteTime = (($restockInfo[3].Substring(($restockInfo[3].IndexOf("~"))+1)).Trim())
         # get AM or PM out of element, join with time (begginning of $websiteTime string), convert to datetime, split into two strings
         $timeWithAMPM = (([DateTime]((($websiteTime.Split("?",2))[0]) + (($websiteTime.Split(">",2))[1]).SubString(0,2)))).ToString() -split '\s',2
-        # join date with time (second element in $timeWithAMPM array because of -split)
-        $combinedDateTime = $restockInfo[3],$timeWithAMPM[1]
+        # join date with time (second element in $timeWithAMPM array because of -split), remove number letters like '1st' or '3rd'
+        $combinedDateTime = ($date + ' ' + $timeWithAMPM[1]) -replace '[rdst]'
 
-        if ($timeWithAMPM[1].length -eq 10) {
-            $restockDate = [DateTime]::ParseExact($combinedDateTime, 'dd.MM.yyyy h:mm:ss tt', $null)
-        }
-        elseif ($timeWithAMPM[1].length -eq 11) {
-            $restockDate = [DateTime]::ParseExact($combinedDateTime, 'dd.MM.yyyy hh:mm:ss tt', $null)
-        }
+        
+        $restockDate = [DateTime]$combinedDateTime
+
+        # if ($timeWithAMPM[1].length -eq 10) {
+        #     $restockDate = [DateTime]::ParseExact($combinedDateTime, 'dd.MM.yyyy h:mm:ss tt', $null)
+        # }
+        # elseif ($timeWithAMPM[1].length -eq 11) {
+        #     $restockDate = [DateTime]::ParseExact($combinedDateTime, 'dd.MM.yyyy hh:mm:ss tt', $null)
+        # }
 
         $color = "Red"
         if (($restockDate.AddHours(-7)) -gt (Get-Date)) { # if $restockDate is in the future, write in green
@@ -35,16 +39,15 @@ while ($timesToRun -eq 0) {
         Write-Host "Local datetime: Unavailable" -ForegroundColor Yellow
     }
     
-    Write-Host "Website info: "$restockInfo[2], ($restockInfo[3]).Split("?",2)[0]`n
+    Write-Host "Website info: "$date, ($restockInfo[3]).Split("?",2)[0]`n
 
     $equipment | ForEach-Object { 
         if ($_ -like '*VPC*' ) {
-            if ($_ -match`
-            'VPC MongoosT-50CM2 Throttle' -or`  # throttle, base included
-            'VPC Constellation ALPHA-R' -or`    # right handed grip
-            'VPC Constellation ALPHA-L' -or`    # left handed grip
-            'VPC MongoosT-50CM2 Base' -or`      # base for mounted grip setups
-            'VPC WarBRD Base') {                # base for desktop grip setups
+            if ($_ -match 'VPC MongoosT-50CM2 Throttle' -or`  # throttle, base included
+                $_ -match 'VPC Constellation ALPHA-R' -or`    # right handed grip
+                $_ -match 'VPC Constellation ALPHA-L' -or`    # left handed grip
+                $_ -match 'VPC MongoosT-50CM2 Base' -or`      # base for mounted grip setups
+                $_ -match 'VPC WarBRD Base') {                # base for desktop grip setups
                 Write-Host $_ -ForegroundColor Green
             }
             else {
