@@ -14,8 +14,8 @@ while ($timesToRun -eq 0) {
         $websiteTime = (($restockInfo[3].Substring(($restockInfo[3].IndexOf("~"))+1)).Trim())
         # get AM or PM out of element, join with time (begginning of $websiteTime string), convert to datetime, split into two strings
         $timeWithAMPM = (([DateTime]((($websiteTime.Split("?",2))[0]) + (($websiteTime.Split(">",2))[1]).SubString(0,2)))).ToString() -split '\s',2
-        # join date with time (second element in $timeWithAMPM array because of -split), remove number letters like '1st' or '3rd'
-        $combinedDateTime = ($date + ' ' + $timeWithAMPM[1]) -replace '[rdst]'
+        # join date with time (second element in $timeWithAMPM array because of -split), remove number letters like '1st, 3rd, 9th'
+        $combinedDateTime = ($date + ' ' + $timeWithAMPM[1]) -replace '[rdsth]'
 
         
         $restockDate = [DateTime]$combinedDateTime
